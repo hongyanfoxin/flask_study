@@ -1,0 +1,34 @@
+1，Debug Mode
+    The flask script is nice to start a local development server, but you would have to restart it manually after each change to your code. That is not very nice and Flask can do better. If you enable debug support the server will reload itself on code changes, and it will also provide you with a helpful debugger if things go wrong.
+    To enable debug mode you can export the FLASK_DEBUG environment variable before running the server:
+    $ export FLASK_DEBUG=1
+    $ flask run
+    (On Windows you need to use set instead of export).
+
+2，Routing
+    the route() decorator is used to bind a function to a URL.
+    @app.route('/')
+    def index():
+    return 'Index Page'
+    @app.route('/hello')
+    def hello():
+    return 'Hello, World'
+
+    You can make certain parts of the URL dynamic and attach multiple rules to a function.
+    Variable Rules
+    To add variable parts to a URL you can mark these special sections as <variable_name>.
+    @app.route('/user/<username>')
+    def show_user_profile(username):
+    # show the user profile for that user
+    return 'User %s' % username
+    @app.route('/post/<int:post_id>')
+    def show_post(post_id):
+    # show the post with the given id, the id is an integer
+    return 'Post %d' % post_id
+    The following converters exist:
+        string  accepts any text without a slash (the default)
+        int     accepts integers
+        float   like int but for floating point values
+        path    like the default but also accepts slashes
+        any     matches one of the items provided
+        uuid    accepts UUID strings
