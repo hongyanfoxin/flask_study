@@ -32,3 +32,71 @@
         path    like the default but also accepts slashes
         any     matches one of the items provided
         uuid    accepts UUID strings
+
+3，The Request Object
+    from flask import request
+
+    The current request method is available by using the method attribute.
+    request.method == 'POST'
+
+    To access form data (data transmitted in a POST or PUT request) you can use the form attribute.
+    request.form['username']
+    What happens if the key does not exist in the form attribute? In that case a special KeyError is raised. You can catch it like a standard KeyError but if you don’t do that, a HTTP 400 Bad Request error page is shown instead. So for many situations you don’t have to deal with that problem.
+
+    To access parameters submitted in the URL (?key=value) you can use the args attribute:
+    request.args.get('key', '')
+
+4，File Uploads
+    You can handle uploaded files with Flask easily. Just make sure not to forget to set the enctype="multipart/form-data" attribute on your HTML form, otherwise the browser will not transmit your files at all.
+    Uploaded files are stored in memory or at a temporary location on the filesystem. You can access those files by looking at the files attribute on the request object. Each uploaded file is stored in that dictionary. It behaves just like a standard Python file object, but it also has a save() method that allows you to store that file on the filesystem of the server. 
+    from flask import request
+    @app.route('/upload', methods=['GET', 'POST'])
+    def upload_file():
+        if request.method == 'POST':
+            f = request.files['the_file']
+            f.save('/var/www/uploads/uploaded_file.txt')
+        ...
+
+    If you want to know how the file was named on the client before it was uploaded to your application, you can access the filename attribute. However please keep in mind that this value can be forged so never ever trust that value. If you want to use the filename of the client to store the file on the server, pass it through the secure_filename() function that Werkzeug provides for you:
+    from flask import request
+    from werkzeug.utils import secure_filename
+    @app.route('/upload', methods=['GET', 'POST'])
+    def upload_file():
+        if request.method == 'POST':
+            f = request.files['the_file']
+            f.save('/var/www/uploads/' + secure_filename(f.filename))
+        ...
+
+    werkzeug.utils.secure_filename(filename)
+    Pass it a filename and it will return a secure version of it. This filename can then safely be stored on a regular file system and passed to os.path.join(). The filename returned is an ASCII only string for maximum portability.
+
+    On windows systems the function also makes sure that the file is not named after one of the special device files.
+
+    >>> secure_filename("My cool movie.mov")
+    'My_cool_movie.mov'
+    >>> secure_filename("../../../etc/passwd")
+    'etc_passwd'
+    >>> secure_filename(u'i contain cool \xfcml\xe4uts.txt')
+    'i_contain_cool_umlauts.txt'
+    The function might return an empty filename. It’s your responsibility to ensure that the filename is unique and that you generate random filename if the function returned an empty one.
+
+5，Cookies
+    To access cookies you can use the cookies attribute. To set cookies you can use the set_cookie method of response objects. The cookies attribute of request objects is a dictionary with all the cookies the client transmits. If you want to use sessions, do not use the cookies directly but instead use the Sessions in Flask that add some security on top of cookies for you.
+
+    Reading cookies:
+    # use cookies.get(key) instead of cookies[key] to not get a
+    # KeyError if the cookie is missing.
+    request.cookies.get('username')
+
+    Storing cookies:
+    from flask import make_response
+    @app.route('/')
+    def index():
+        resp = make_response(render_template(...))
+            resp.set_cookie('username', 'the username')
+            return resp
+
+    Note that cookies are set on response objects. Since you normally just return strings from the view functions Flask will convert them into response objects for you. If you explicitly want to do that you can use the make_response() function and then modify it.
+
+6，1.4.10 Sessions
+    
