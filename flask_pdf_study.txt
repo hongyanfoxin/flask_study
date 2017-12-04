@@ -99,4 +99,5 @@
     Note that cookies are set on response objects. Since you normally just return strings from the view functions Flask will convert them into response objects for you. If you explicitly want to do that you can use the make_response() function and then modify it.
 
 6，1.4.10 Sessions
+    In addition to the request object there is also a second object called session which allows you to store information specific to a user from one request to the next.
     

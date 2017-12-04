@@ -1,2 +1,3 @@
 *.pyc
-hello_world/venv
+*/venv
+*egg-info*
